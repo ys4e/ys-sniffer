@@ -3,6 +3,7 @@ mod cryptography;
 mod utils;
 
 use std::fmt::{Debug, Formatter};
+use std::thread;
 use serde::{Deserialize, Serialize};
 
 use anyhow::Result;
@@ -19,27 +20,27 @@ use log::{error, trace};
 /// ```rust,no_run
 /// use ys_sniffer::Config;
 ///
-/// async fn main() -> anyhow::Result<()> {
+/// fn main() -> anyhow::Result<()> {
 ///     let (tx, rx) = crossbeam_channel::unbounded();
-///     let shutdown_hook = ys_sniffer::sniff(Config::default(), tx).await?;
-/// 
+///     let shutdown_hook = ys_sniffer::sniff(Config::default(), tx)?;
+///
 ///     // To stop the sniffer, send a message to the shutdown hook.
 ///     shutdown_hook.send(())?;
-/// 
+///
 ///     Ok(())
 /// }
 /// ```
-pub async fn sniff(
+pub fn sniff(
     config: Config,
     consumer: Sender<GamePacket>
 ) -> Result<Sender<()>> {
     trace!("Configuration to be used: {:#?}", config);
-    
+
     // Create shutdown hook.
     let (tx, rx) = crossbeam_channel::bounded(1);
 
     // Run the packet sniffer.
-    tokio::spawn(async move {
+    thread::spawn(|| {
         if let Err(error) = sniffer::run(config, rx, consumer) {
             error!("Failed to run the sniffer: {:#?}", error);
         }
@@ -84,17 +85,17 @@ pub enum PacketSource {
 
 impl PacketSource {
     /// Determines the packet source based on the configuration and port.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust,no_run
     /// use ys_sniffer::{PacketSource, Config};
-    /// 
+    ///
     /// let config = Config {
     ///     server_port: vec![22101, 22102],
     ///     ..Default::default()
     /// };
-    /// 
+    ///
     /// let result = PacketSource::from(&config, 22101);
     /// assert_eq!(result, PacketSource::Server);
     /// ```
@@ -105,12 +106,12 @@ impl PacketSource {
             PacketSource::Client
         }
     }
-    
+
     /// Simple utility method to determine if the packet is from the client.
     pub fn is_client(&self) -> bool {
         self.eq(&PacketSource::Client)
     }
-    
+
     /// Simple utility method to determine if the packet is from the server.
     pub fn is_server(&self) -> bool {
         self.eq(&PacketSource::Server)
@@ -156,14 +157,14 @@ pub struct Config {
     ///
     /// `[22101, 22102]`
     pub server_port: Vec<u16>,
-    
+
     /// The path to a file containing known seeds.
     /// The specific path needs to be readable and writable.
-    /// 
+    ///
     /// This cannot be left blank.
-    /// 
+    ///
     /// # Default
-    /// 
+    ///
     /// `known_seeds.txt`
     pub known_seeds: String
 }
