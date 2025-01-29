@@ -1,6 +1,6 @@
 [package]
 name = "ys-sniffer"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["KingRainbow44"]
 description = "Embeddable packet sniffer for anime game"
 license = "MIT"
@@ -22,7 +22,7 @@ protoshark = { path = "../protoshark" }
 pcap = "2"
 
 # Tokio (async runtime)
-tokio = { version = "1", features = ["signal"] }
+tokio = { version = "1", features = ["signal", "rt"] }
 
 # Serde deserialization
 serde = { version = "1", features = ["derive"] }

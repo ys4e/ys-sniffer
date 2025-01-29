@@ -7,44 +7,45 @@ use serde::{Deserialize, Serialize};
 
 use anyhow::Result;
 use crossbeam_channel::Sender;
-use log::trace;
+use log::{error, trace};
 
 /// Sniffs game packets from the network using `pcap`.
 ///
 /// If an error occurs while configuring the packet sniffer,
 /// it will be thrown in the `Result`.
 ///
-/// # Notice
-///
-/// This function will block until a Ctrl + C signal is received.
-///
 /// # Examples
 ///
 /// ```rust,no_run
 /// use ys_sniffer::Config;
 ///
-/// let (tx, rx) = crossbeam_channel::unbounded();
-/// _ = ys_sniffer::sniff(Config::default(), tx);
+/// async fn main() -> anyhow::Result<()> {
+///     let (tx, rx) = crossbeam_channel::unbounded();
+///     let shutdown_hook = ys_sniffer::sniff(Config::default(), tx).await?;
+/// 
+///     // To stop the sniffer, send a message to the shutdown hook.
+///     shutdown_hook.send(())?;
+/// 
+///     Ok(())
+/// }
 /// ```
 pub async fn sniff(
     config: Config,
     consumer: Sender<GamePacket>
-) -> Result<()> {
+) -> Result<Sender<()>> {
     trace!("Configuration to be used: {:#?}", config);
     
     // Create shutdown hook.
     let (tx, rx) = crossbeam_channel::bounded(1);
 
     // Run the packet sniffer.
-    sniffer::run(config, rx, consumer)?;
+    tokio::spawn(async move {
+        if let Err(error) = sniffer::run(config, rx, consumer) {
+            error!("Failed to run the sniffer: {:#?}", error);
+        }
+    });
 
-    // Wait for a Ctrl + C signal.
-    tokio::signal::ctrl_c().await?;
-
-    // Shutdown the receiver loop.
-    tx.send(())?;
-
-    Ok(())
+    Ok(tx)
 }
 
 /// Represents a processed game packet.

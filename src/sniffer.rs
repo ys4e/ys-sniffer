@@ -7,7 +7,7 @@ use pcap::{Capture, Device, Linktype, Packet};
 use anyhow::{anyhow, Result};
 use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
-use log::{error, info, trace, warn};
+use log::{error, trace, warn};
 use bytes::BufMut;
 use lazy_static::lazy_static;
 use rsa::pkcs1::DecodeRsaPrivateKey;
@@ -77,7 +77,7 @@ pub fn run(
             return Err(anyhow!("No device (specified or unspecified) found."))
         }
     };
-    
+
     trace!(
         "Using device {} ({}) for capturing.",
         match device.desc {
@@ -134,11 +134,11 @@ fn parse_packet(
 
         (Vec::from(data), port)
     };
-    
+
     // Check the packet's source.
     let source = PacketSource::from(config, port);
     trace!("Received packet of length {} from {:?} ({}).", data.len(), source, port);
-    
+
     // Pre-process the packet.
     if data.len() == 20 {
         // This is a handshake packet; we should probably interpret it.
@@ -436,7 +436,7 @@ impl Processor {
 
                     // Parse the server seed from binary.
                     let server_seed = u64::from_be_bytes(decrypted[0..8].try_into().unwrap());
-                    
+
                     // Store the handshake data.
                     self.handshake = Some((sent_time, server_seed));
                 },
