@@ -1,6 +1,6 @@
 [package]
 name = "ys-sniffer"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["KingRainbow44"]
 description = "Embeddable packet sniffer for anime game"
 license = "MIT"
