@@ -86,16 +86,17 @@ pub fn sniff(
 /// If an error occurs while configuring the packet sniffer,
 /// it will be thrown in the `Result`.
 /// 
-/// This requires a tokio async channel.
+/// This requires a Tokio MPSC unbounded channel.
 ///
 /// # Examples
 ///
 /// ```rust,no_run
 /// use ys_sniffer::Config;
 ///
-/// fn main() -> anyhow::Result<()> {
-///     let (tx, rx) = crossbeam_channel::unbounded();
-///     let shutdown_hook = ys_sniffer::sniff(Config::default(), tx)?;
+/// #[tokio::main]
+/// async fn main() -> anyhow::Result<()> {
+///     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+///     let shutdown_hook = ys_sniffer::sniff_async(Config::default(), tx).await?;
 ///
 ///     // To stop the sniffer, send a message to the shutdown hook.
 ///     shutdown_hook.send(())?;
