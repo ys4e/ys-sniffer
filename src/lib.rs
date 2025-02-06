@@ -11,7 +11,7 @@ use crossbeam_channel::Sender;
 use log::{error, trace};
 
 #[cfg(feature = "tokio")]
-use tokio::sync::mpsc::Sender as AsyncSender;
+use tokio::sync::mpsc::UnboundedSender as AsyncSender;
 #[cfg(feature = "tokio")]
 use tokio::runtime::Handle;
 
