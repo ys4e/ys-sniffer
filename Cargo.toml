@@ -8,9 +8,14 @@ readme = "README.md"
 edition = "2021"
 
 [features]
+
 processor = []
+tokio = ["dep:tokio"]
 
 [dependencies]
+
+# Tokio asynchronous runtime
+tokio = { version = "1", optional = true, features = ["sync", "rt"] }
 
 # KCP decoder library
 ys-kcp = { path = "../ys-kcp", features = ["byte-check"] }

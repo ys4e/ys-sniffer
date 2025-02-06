@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Receiver;
 use pcap::{Capture, Device, Linktype, Packet};
 use anyhow::{anyhow, Result};
 use base64::Engine;
@@ -54,11 +54,16 @@ lazy_static! {
     static ref RSA_PRIVATE_KEY: RsaPrivateKey = RsaPrivateKey::from_pkcs1_pem(RSA_KEY).unwrap();
 }
 
+pub(crate) trait PacketSender {
+    /// Invoked when a packet should be sent.
+    fn send(&self, data: GamePacket);
+}
+
 /// Runs the actual packet sniffer.
 pub fn run(
     config: Config,
     hook: Receiver<()>,
-    tx: Sender<GamePacket>
+    tx: impl PacketSender + 'static
 ) -> Result<()> {
     // Create game packet processor.
     let mut processor = Processor::new(&config, tx);
@@ -306,7 +311,7 @@ enum PacketKey {
 /// let packet = rx.recv().unwrap();
 /// ```
 pub struct Processor {
-    packet_consumer: Sender<GamePacket>,
+    packet_consumer: Box<dyn PacketSender>,
     known_seeds: &'static Path,
 
     key: PacketKey,
@@ -318,12 +323,12 @@ pub struct Processor {
 
 impl Processor {
     /// Creates a new instance of the `Processor`.
-    pub fn new(config: &Config, tx: Sender<GamePacket>) -> Self {
+    pub fn new(config: &Config, tx: impl PacketSender + 'static) -> Self {
         let seeds_path = config.known_seeds.clone();
         let seeds_path = Box::leak(seeds_path.into_boxed_str());
 
         Processor {
-            packet_consumer: tx,
+            packet_consumer: Box::new(tx),
             known_seeds: Path::new(seeds_path),
             key: PacketKey::None,
             handshake: None,

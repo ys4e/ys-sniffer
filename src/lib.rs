@@ -10,6 +10,35 @@ use anyhow::Result;
 use crossbeam_channel::Sender;
 use log::{error, trace};
 
+#[cfg(feature = "tokio")]
+use tokio::sync::mpsc::Sender as AsyncSender;
+#[cfg(feature = "tokio")]
+use tokio::runtime::Handle;
+
+struct CrossbeamSender {
+    sender: Sender<GamePacket>
+}
+
+impl PacketSender for CrossbeamSender {
+    fn send(&self, data: GamePacket) {
+        self.sender.send(data).unwrap()
+    }
+}
+
+#[cfg(feature = "tokio")]
+struct TokioSender {
+    sender: AsyncSender<GamePacket>
+}
+
+#[cfg(feature = "tokio")]
+impl PacketSender for TokioSender {
+    fn send(&self, data: GamePacket) {
+        _ = Handle::current().block_on(async {
+            self.sender.send(data)
+        });
+    }
+}
+
 /// Sniffs game packets from the network using `pcap`.
 ///
 /// If an error occurs while configuring the packet sniffer,
@@ -38,7 +67,55 @@ pub fn sniff(
 
     // Create shutdown hook.
     let (tx, rx) = crossbeam_channel::bounded(1);
+    
+    // Create the packet sender.
+    let consumer = CrossbeamSender { sender: consumer };
 
+    // Run the packet sniffer.
+    thread::spawn(|| {
+        if let Err(error) = sniffer::run(config, rx, consumer) {
+            error!("Failed to run the sniffer: {:#?}", error);
+        }
+    });
+
+    Ok(tx)
+}
+
+/// Sniffs game packets from the network using `pcap`.
+///
+/// If an error occurs while configuring the packet sniffer,
+/// it will be thrown in the `Result`.
+/// 
+/// This requires a tokio async channel.
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use ys_sniffer::Config;
+///
+/// fn main() -> anyhow::Result<()> {
+///     let (tx, rx) = crossbeam_channel::unbounded();
+///     let shutdown_hook = ys_sniffer::sniff(Config::default(), tx)?;
+///
+///     // To stop the sniffer, send a message to the shutdown hook.
+///     shutdown_hook.send(())?;
+///
+///     Ok(())
+/// }
+/// ```
+#[cfg(feature = "tokio")]
+pub fn sniff_async(
+    config: Config,
+    consumer: AsyncSender<GamePacket>
+) -> Result<Sender<()>> {
+    trace!("Configuration to be used: {:#?}", config);
+
+    // Create shutdown hook.
+    let (tx, rx) = crossbeam_channel::bounded(1);
+
+    // Create the packet sender.
+    let consumer = TokioSender { sender: consumer };
+    
     // Run the packet sniffer.
     thread::spawn(|| {
         if let Err(error) = sniffer::run(config, rx, consumer) {
@@ -183,3 +260,4 @@ impl Default for Config {
 // If the feature is enabled, include the `processor` module.
 #[cfg(feature = "processor")]
 pub use sniffer::Processor;
+use crate::sniffer::PacketSender;
