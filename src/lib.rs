@@ -33,8 +33,9 @@ struct TokioSender {
 #[cfg(feature = "tokio")]
 impl PacketSender for TokioSender {
     fn send(&self, data: GamePacket) {
-        _ = Handle::current().block_on(async {
-            self.sender.send(data)
+        let sender = self.sender.clone();
+        _ = Handle::current().spawn(async move {
+            sender.send(data)
         });
     }
 }
@@ -118,7 +119,7 @@ pub fn sniff_async(
     let consumer = TokioSender { sender: consumer };
     
     // Run the packet sniffer.
-    thread::spawn(|| {
+    tokio::spawn(async move {
         if let Err(error) = sniffer::run(config, rx, consumer) {
             error!("Failed to run the sniffer: {:#?}", error);
         }
