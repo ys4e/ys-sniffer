@@ -2,7 +2,7 @@ mod sniffer;
 mod cryptography;
 mod utils;
 
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::thread;
 use serde::{Deserialize, Serialize};
 
@@ -184,6 +184,14 @@ impl PacketSource {
             PacketSource::Client
         }
     }
+    
+    /// Converts the packet source to a string.
+    pub fn to_string(&self) -> &'static str {
+        match self {
+            PacketSource::Client => "Client",
+            PacketSource::Server => "Server"
+        }
+    }
 
     /// Simple utility method to determine if the packet is from the client.
     pub fn is_client(&self) -> bool {
@@ -196,12 +204,15 @@ impl PacketSource {
     }
 }
 
+impl Display for PacketSource {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 impl Debug for PacketSource {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            PacketSource::Client => write!(f, "Client"),
-            PacketSource::Server => write!(f, "Server")
-        }
+        write!(f, "{}", self.to_string())
     }
 }
 
