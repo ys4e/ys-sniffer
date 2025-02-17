@@ -54,7 +54,7 @@ lazy_static! {
     static ref RSA_PRIVATE_KEY: RsaPrivateKey = RsaPrivateKey::from_pkcs1_pem(RSA_KEY).unwrap();
 }
 
-pub(crate) trait PacketSender {
+pub trait PacketSender {
     /// Invoked when a packet should be sent.
     fn send(&self, data: GamePacket);
 }
