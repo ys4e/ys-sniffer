@@ -177,6 +177,7 @@ fn parse_packet(
 /// `token`: The KCP token.
 fn new_kcp(conv: u32, token: u32) -> Kcp<Writer> {
     let mut kcp = Kcp::new(conv, token, Writer);
+    kcp.set_header_len(kcp::MAX_KCP_OVERHEAD);
     kcp.set_nodelay(true, 10, 2, false);
     kcp.set_wndsize(256, 256);
 
