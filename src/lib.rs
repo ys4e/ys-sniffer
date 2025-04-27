@@ -217,6 +217,12 @@ impl Debug for PacketSource {
     }
 }
 
+impl Default for PacketSource {
+    fn default() -> Self {
+        PacketSource::Server
+    }
+}
+
 /// Configuration used for the sniffer.
 ///
 /// This does not include any programmable logic.
