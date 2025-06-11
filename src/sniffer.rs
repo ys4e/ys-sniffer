@@ -431,7 +431,7 @@ impl Processor {
 
                     // Get the `sent_ms` field.
                     // This is always field 6 if decoded properly.
-                    let Some(Value::VarInt(sent_time)) = header.get(&6) else {
+                    let Some(Value::VarInt(sent_time)) = header.get(6) else {
                         error!("Failed to decode packet header: `sent_ms` field not found");
                         return;
                     };
