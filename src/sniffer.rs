@@ -548,9 +548,11 @@ fn bruteforce(
     if seeds_file.exists() {
         file_content = utils::read_file(seeds_file).unwrap();
         for line in file_content.lines() {
-            let seed = line.parse().unwrap();
-            if let Some(seed) = try_seed(seed, server_seed, 10000, data) {
-                return Some(seed);
+            if let Ok(seed) = line.parse::<i64>() {
+                // If the seed is a valid i64, we can try it.
+                if let Some(seed) = try_seed(seed, server_seed, 10000, data) {
+                    return Some(seed);
+                }
             }
         }
 
