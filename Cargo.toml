@@ -1,6 +1,6 @@
 [package]
 name = "ys-sniffer"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["KingRainbow44"]
 description = "Embeddable packet sniffer for anime game"
 license = "MIT"
@@ -18,10 +18,10 @@ tokio = ["dep:tokio"]
 tokio = { version = "1", optional = true, features = ["sync", "rt"] }
 
 # KCP decoder library
-ys-kcp = { path = "../ys-kcp", features = ["byte-check"] }
+ys-kcp = { git = "https://github.com/ys4e/ys-kcp", features = ["byte-check"] }
 
 # Arbitrary protocol buffer data parser
-protoshark = { path = "../protoshark" }
+protoshark = { git = "https://github.com/ys4e/protoshark" }
 
 # `pcap` wrapper library
 pcap = "2"
