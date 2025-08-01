@@ -5,6 +5,7 @@ authors = ["KingRainbow44"]
 description = "Embeddable packet sniffer for anime game"
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/ys4e/ys-sniffer"
 edition = "2021"
 
 [features]
@@ -18,10 +19,10 @@ tokio = ["dep:tokio"]
 tokio = { version = "1", optional = true, features = ["sync", "rt"] }
 
 # KCP decoder library
-ys-kcp = { git = "https://github.com/ys4e/ys-kcp", features = ["byte-check"] }
+ys-kcp = { version = "1.2.1", features = ["byte-check"] }
 
 # Arbitrary protocol buffer data parser
-protoshark = { git = "https://github.com/ys4e/protoshark" }
+protoshark = "2.0.0"
 
 # `pcap` wrapper library
 pcap = "2"

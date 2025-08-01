@@ -389,8 +389,9 @@ dependencies = [
 
 [[package]]
 name = "protoshark"
-version = "1.2.0"
-source = "git+https://github.com/ys4e/protoshark#6e06ae9cb20e3e3ee2f0f79baa83399ad4c68790"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e0642b610180c4e7a141366de4ad64e31683814cf16bb1ab74448a2ea97e7ec"
 dependencies = [
  "base64",
  "paste",
@@ -800,8 +801,9 @@ checksum = "fdd20c5420375476fbd4394763288da7eb0cc0b8c11deed431a91562af7335d3"
 
 [[package]]
 name = "ys-kcp"
-version = "1.2.0"
-source = "git+https://github.com/ys4e/ys-kcp#946353955a95c4f82f41c6eaf953ee816af2a3bc"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e939b825d2a812b2a9e6f474036f7ced99a3f3ac44cd5c689442df61a878e921"
 dependencies = [
  "bytes",
  "log",
